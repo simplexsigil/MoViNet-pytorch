@@ -31,4 +31,4 @@ EOF
 rm video_data/*.rar
 
 
-wget -o a0_hmdb51_no_causal.pth https://cvhci.anthropomatik.kit.edu/~dschneider/checkpoints/hmdb51/movinet/a0/a0_hmdb51_no_causal.pth
+wget -O a0_hmdb51_no_causal.pth https://cvhci.anthropomatik.kit.edu/~dschneider/checkpoints/hmdb51/movinet/a0/a0_hmdb51_no_causal.pth
