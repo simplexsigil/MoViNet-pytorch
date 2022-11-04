@@ -1,0 +1,5 @@
+*__pycache__*
+test_train_splits
+video_data
+transforms.py
+a0_hmdb51_no_causal.pth

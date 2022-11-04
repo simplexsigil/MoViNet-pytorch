@@ -14,9 +14,12 @@ model = MoViNet(_C.MODEL.MoViNetA0, causal=False, pretrained=True)
 model.classifier[3] = torch.nn.Conv3d(2048, 51, (1, 1, 1))
 start_time = time.time()
 
-model.load_state_dict(torch.load("a0_hmdb51_no_causal.pth"))
+if torch.cuda.is_available():
+    model.load_state_dict(torch.load("a0_hmdb51_no_causal.pth"))
+    model.cuda()
+else:
+    model.load_state_dict(torch.load("a0_hmdb51_no_causal.pth", map_location=torch.device('cpu')))
 model.eval()
-model.cuda()
 
 torch.manual_seed(97)
 num_frames = 16  # 16
@@ -77,12 +80,18 @@ def evaluate(model, data_load, loss_val):
     model.clean_activation_buffers()
     with torch.no_grad():
         for data, _, target in data_load:
-            output = F.log_softmax(model(data.cuda()), dim=1)
-            loss = F.nll_loss(output, target.cuda(), reduction='sum')
-            _, pred = torch.max(output, dim=1)
-
-            tloss += loss.item()
-            csamp += pred.eq(target.cuda()).sum()
+            if torch.cuda.is_available():
+                output = F.log_softmax(model(data.cuda()), dim=1)
+                loss = F.nll_loss(output, target.cuda(), reduction='sum')
+                _, pred = torch.max(output, dim=1)
+                tloss += loss.item()
+                csamp += pred.eq(target.cuda()).sum()
+            else:
+                output = F.log_softmax(model(data), dim=1)
+                loss = F.nll_loss(output, target, reduction='sum')
+                _, pred = torch.max(output, dim=1)
+                tloss += loss.item()
+                csamp += pred.eq(target).sum()
             model.clean_activation_buffers()
     aloss = tloss / samples
     loss_val.append(aloss)
